@@ -136,7 +136,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <p>EventQR Event Management System &bull; MySQL &bull; Prisma &bull; Next.js 14 App Router</p>
+        <p>EventQR Event Management System</p>
       </footer>
     </div>
   );
