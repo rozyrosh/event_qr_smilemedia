@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String           @id @default(cuid())
+  name        String
+  date        DateTime
+  location    String?
+  description String?
+  createdAt   DateTime         @default(now())
+  customers   Customer[]
+  items       RedemptionItem[]
+}
+
+model Customer {
+  id          String        @id @default(cuid())
+  eventId     String
+  event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  fullName    String
+  phone       String?
+  email       String?
+  ticketType  String?
+  qrToken     String        @unique // random UUID, indexed
+  createdAt   DateTime      @default(now())
+  attendance  Attendance?
+  redemptions Redemption[]
+
+  @@index([eventId])
+}
+
+model Attendance {
+  id         String   @id @default(cuid())
+  customerId String   @unique // enforces one check-in per customer at DB level
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  scannedAt  DateTime @default(now())
+  scannedBy  String?  // staff user id/name
+}
+
+model RedemptionItem {
+  id             String       @id @default(cuid())
+  eventId        String
+  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name           String       // e.g. "Lunch", "Welcome Gift", "VIP Drinks"
+  maxPerCustomer Int          @default(1)
+  redemptions    Redemption[]
+
+  @@index([eventId])
+}
+
+model Redemption {
+  id               String         @id @default(cuid())
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  redemptionItemId String
+  redemptionItem   RedemptionItem @relation(fields: [redemptionItemId], references: [id], onDelete: Cascade)
+  redeemedAt       DateTime       @default(now())
+  redeemedBy       String?
+
+  @@unique([customerId, redemptionItemId]) // DB-level guard against duplicate redemption
+  @@index([redemptionItemId])
+}
