@@ -70,6 +70,7 @@ export async function GET(
       customer: {
         id: customer.id,
         fullName: customer.fullName,
+        company: customer.company,
         email: customer.email,
         phone: customer.phone,
         ticketType: customer.ticketType,

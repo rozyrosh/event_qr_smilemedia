@@ -14,10 +14,11 @@ import {
   Edit2,
   CheckCircle2,
   X,
-  Ticket,
-  Mail,
+  Building2,
   Phone,
   Gift,
+  Clock,
+  User,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 
@@ -25,6 +26,7 @@ interface Customer {
   id: string;
   eventId: string;
   fullName: string;
+  company?: string | null;
   phone?: string | null;
   email?: string | null;
   ticketType?: string | null;
@@ -51,7 +53,6 @@ export default function CustomersManagementPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [ticketFilter, setTicketFilter] = useState('ALL');
 
   // Modals
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -59,11 +60,10 @@ export default function CustomersManagementPage() {
   const [badgeQrDataUrl, setBadgeQrDataUrl] = useState<string>('');
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
-  // Form State
+  // Form State - only Name, Company, Mobile Number
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
   const [phone, setPhone] = useState('');
-  const [ticketType, setTicketType] = useState('General Admission');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,7 +74,6 @@ export default function CustomersManagementPage() {
       const params = new URLSearchParams({
         eventId: selectedEventId,
         search,
-        ticketType: ticketFilter,
       });
 
       const res = await fetch(`/api/customers?${params.toString()}`);
@@ -87,7 +86,7 @@ export default function CustomersManagementPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedEventId, search, ticketFilter]);
+  }, [selectedEventId, search]);
 
   useEffect(() => {
     fetchCustomers();
@@ -96,9 +95,8 @@ export default function CustomersManagementPage() {
   const openCreateModal = () => {
     setEditingCustomer(null);
     setFullName('');
-    setEmail('');
+    setCompany('');
     setPhone('');
-    setTicketType('General Admission');
     setError(null);
     setCreateModalOpen(true);
   };
@@ -106,9 +104,8 @@ export default function CustomersManagementPage() {
   const openEditModal = (cust: Customer) => {
     setEditingCustomer(cust);
     setFullName(cust.fullName);
-    setEmail(cust.email || '');
+    setCompany(cust.company || '');
     setPhone(cust.phone || '');
-    setTicketType(cust.ticketType || 'General Admission');
     setError(null);
     setCreateModalOpen(true);
   };
@@ -130,8 +127,8 @@ export default function CustomersManagementPage() {
 
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName) {
-      setError('Full Name is required');
+    if (!fullName.trim()) {
+      setError('Name is required');
       return;
     }
 
@@ -148,9 +145,8 @@ export default function CustomersManagementPage() {
         body: JSON.stringify({
           eventId: selectedEventId,
           fullName,
-          email,
+          company,
           phone,
-          ticketType,
         }),
       });
 
@@ -162,14 +158,14 @@ export default function CustomersManagementPage() {
       await fetchCustomers();
       setCreateModalOpen(false);
     } catch (err: any) {
-      setError(err.message || 'Error saving attendee');
+      setError(err.message || 'Error saving customer');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteCustomer = async (id: string, name: string) => {
-    if (!confirm(`Delete attendee "${name}"? This action cannot be undone.`)) return;
+    if (!confirm(`Delete customer "${name}"? This action cannot be undone.`)) return;
 
     try {
       const res = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
@@ -177,7 +173,7 @@ export default function CustomersManagementPage() {
         await fetchCustomers();
       }
     } catch (err) {
-      alert('Error deleting attendee');
+      alert('Error deleting customer');
     }
   };
 
@@ -216,134 +212,135 @@ export default function CustomersManagementPage() {
         </button>
       </div>
 
-      {/* Filters & Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, phone, or QR token..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Ticket className="w-4 h-4 text-slate-400 hidden sm:inline" />
-          <select
-            value={ticketFilter}
-            onChange={(e) => setTicketFilter(e.target.value)}
-            className="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
-          >
-            <option value="ALL">All Ticket Types</option>
-            <option value="VIP Pass">VIP Pass</option>
-            <option value="General Admission">General Admission</option>
-            <option value="Speaker">Speaker</option>
-            <option value="Staff">Staff</option>
-          </select>
-        </div>
+      {/* Search Bar */}
+      <div className="relative flex-1">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, company, mobile number, or QR token..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+        />
       </div>
 
-      {/* Attendees Table */}
+      {/* Customers Table */}
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider font-bold text-slate-600">
-                <th className="py-4 px-6">Customer</th>
-                <th className="py-4 px-6">Ticket Type</th>
-                <th className="py-4 px-6">Attendance</th>
-                <th className="py-4 px-6">Redemptions</th>
-                <th className="py-4 px-6 text-right">QR & Actions</th>
+          <table className="w-full text-left text-sm text-slate-600">
+            <thead className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th className="px-6 py-4">Customer Name</th>
+                <th className="px-6 py-4">Company</th>
+                <th className="px-6 py-4">Mobile Number</th>
+                <th className="px-6 py-4">Check-In Status</th>
+                <th className="px-6 py-4">Item Redemptions</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500 animate-pulse">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                    <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                     Loading customers...
                   </td>
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center text-slate-500">
-                    <Users className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                    <p className="font-bold text-slate-800">No customers found</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Register customers in advance to generate cryptographic QR badge codes.
-                    </p>
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                    <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                    No customers found. Click &quot;Register Customer&quot; above to add attendees.
                   </td>
                 </tr>
               ) : (
                 customers.map((cust) => (
-                  <tr key={cust.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-slate-900">{cust.fullName}</div>
-                      <div className="text-xs text-slate-500 flex items-center space-x-3 mt-0.5">
-                        {cust.email && (
-                          <span className="flex items-center">
-                            <Mail className="w-3 h-3 mr-1 text-slate-400" />
-                            {cust.email}
-                          </span>
-                        )}
-                        {cust.phone && (
-                          <span className="flex items-center">
-                            <Phone className="w-3 h-3 mr-1 text-slate-400" />
-                            {cust.phone}
-                          </span>
-                        )}
+                  <tr key={cust.id} className="hover:bg-slate-50/60 transition group">
+                    {/* Name */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-xs flex-shrink-0">
+                          {cust.fullName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900">{cust.fullName}</div>
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            {cust.qrToken.slice(0, 13)}...
+                          </div>
+                        </div>
                       </div>
                     </td>
 
-                    <td className="py-4 px-6">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        {cust.ticketType || 'General'}
-                      </span>
+                    {/* Company */}
+                    <td className="px-6 py-4">
+                      {cust.company ? (
+                        <div className="flex items-center space-x-1.5 text-slate-800 font-medium text-xs">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span>{cust.company}</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-xs italic">—</span>
+                      )}
                     </td>
 
-                    <td className="py-4 px-6">
+                    {/* Mobile Number */}
+                    <td className="px-6 py-4">
+                      {cust.phone ? (
+                        <div className="flex items-center space-x-1.5 text-slate-700 text-xs">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span>{cust.phone}</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-xs italic">—</span>
+                      )}
+                    </td>
+
+                    {/* Attendance Check-in */}
+                    <td className="px-6 py-4">
                       {cust.attendance ? (
                         <div>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
                             Checked In
                           </span>
-                          <div className="text-[11px] text-slate-500 mt-1">
-                            {formatDateTime(cust.attendance.scannedAt)}
+                          <div className="text-[10px] text-slate-400 mt-1 flex items-center space-x-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{formatDateTime(cust.attendance.scannedAt)}</span>
                           </div>
                         </div>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                          Not Checked In
+                          Pending
                         </span>
                       )}
                     </td>
 
-                    <td className="py-4 px-6">
+                    {/* Item Redemptions */}
+                    <td className="px-6 py-4">
                       {cust.redemptions && cust.redemptions.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {cust.redemptions.map((r) => (
+                          {cust.redemptions.map((red) => (
                             <span
-                              key={r.id}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200"
+                              key={red.id}
+                              className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200"
                             >
-                              <Gift className="w-3 h-3 mr-1 text-amber-600" />
-                              {r.redemptionItem?.name}
+                              <Gift className="w-3 h-3 mr-1 text-purple-500" />
+                              {red.redemptionItem?.name}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-500 font-medium">0 claimed</span>
+                        <span className="text-xs text-slate-400">0 claimed</span>
                       )}
                     </td>
 
-                    <td className="py-4 px-6 text-right">
+                    {/* Actions */}
+                    <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => openBadgeModal(cust)}
-                          title="View QR Badge & Print"
-                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-xs font-semibold border border-indigo-200 hover:border-indigo-600 transition shadow-xs"
+                          title="View & Print Badge"
+                          className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition border border-indigo-200"
                         >
                           <QrCode className="w-3.5 h-3.5" />
                           <span>QR Badge</span>
@@ -401,9 +398,17 @@ export default function CustomersManagementPage() {
                 <h2 className="text-2xl font-black text-slate-950 tracking-tight">
                   {badgeModalCustomer.fullName}
                 </h2>
-                <div className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-bold text-xs uppercase tracking-wide">
-                  {badgeModalCustomer.ticketType || 'General Admission'}
-                </div>
+                {badgeModalCustomer.company && (
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs">
+                    <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{badgeModalCustomer.company}</span>
+                  </div>
+                )}
+                {badgeModalCustomer.phone && (
+                  <div className="text-xs text-slate-500 font-medium">
+                    {badgeModalCustomer.phone}
+                  </div>
+                )}
               </div>
 
               {/* QR Image */}
@@ -445,10 +450,10 @@ export default function CustomersManagementPage() {
         </div>
       )}
 
-      {/* Create / Edit Attendee Modal */}
+      {/* Create / Edit Customer Modal - ONLY Name, Company, Mobile Number */}
       {createModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <h2 className="text-lg font-bold text-slate-900">
                 {editingCustomer ? 'Edit Customer' : 'Register New Customer'}
@@ -462,15 +467,17 @@ export default function CustomersManagementPage() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSaveCustomer} className="space-y-4">
+              {/* Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Full Name *
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                  <User className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Name *</span>
                 </label>
                 <input
                   type="text"
@@ -482,49 +489,34 @@ export default function CustomersManagementPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="sarah@example.com"
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 000-1234"
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
-                  />
-                </div>
+              {/* Company */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Company</span>
+                </label>
+                <input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="e.g. Acme Corporation"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                />
               </div>
 
+              {/* Mobile Number */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Ticket Type
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Phone className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Mobile Number</span>
                 </label>
-                <select
-                  value={ticketType}
-                  onChange={(e) => setTicketType(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
-                >
-                  <option value="General Admission">General Admission</option>
-                  <option value="VIP Pass">VIP Pass</option>
-                  <option value="Speaker">Speaker</option>
-                  <option value="Staff">Staff</option>
-                  <option value="Media">Media / Press</option>
-                </select>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. +1 (555) 000-1234"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                />
               </div>
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">

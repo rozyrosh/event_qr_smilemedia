@@ -42,8 +42,9 @@ export async function GET(
     const baseHeaders = [
       'Customer ID',
       'Full Name',
+      'Company',
+      'Mobile Number',
       'Email',
-      'Phone',
       'Ticket Type',
       'QR Token',
       'Checked In',
@@ -79,8 +80,9 @@ export async function GET(
       return [
         escapeCsv(cust.id),
         escapeCsv(cust.fullName),
-        escapeCsv(cust.email),
+        escapeCsv(cust.company),
         escapeCsv(cust.phone),
+        escapeCsv(cust.email),
         escapeCsv(cust.ticketType),
         escapeCsv(cust.qrToken),
         escapeCsv(isCheckedIn),

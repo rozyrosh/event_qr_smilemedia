@@ -16,6 +16,7 @@ import {
   Camera,
   Search,
   ArrowLeft,
+  Building2,
   Mail,
   Phone,
   Clock,
@@ -28,6 +29,7 @@ interface VerifyData {
   customer: {
     id: string;
     fullName: string;
+    company?: string | null;
     email?: string | null;
     phone?: string | null;
     ticketType?: string | null;
@@ -548,24 +550,20 @@ export default function ScannerPage() {
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                     {verifyData.customer.fullName}
                   </h2>
-                  <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                    {verifyData.customer.email && (
-                      <span className="flex items-center">
-                        <Mail className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                        {verifyData.customer.email}
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1.5">
+                    {verifyData.customer.company && (
+                      <span className="inline-flex items-center text-slate-700 font-medium">
+                        <Building2 className="w-3.5 h-3.5 mr-1 text-indigo-500" />
+                        {verifyData.customer.company}
                       </span>
                     )}
                     {verifyData.customer.phone && (
-                      <span className="flex items-center">
+                      <span className="inline-flex items-center">
                         <Phone className="w-3.5 h-3.5 mr-1 text-slate-400" />
                         {verifyData.customer.phone}
                       </span>
                     )}
                   </div>
-                </div>
-
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold">
-                  {verifyData.customer.ticketType || 'General'}
                 </div>
               </div>
 

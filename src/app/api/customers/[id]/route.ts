@@ -55,15 +55,16 @@ export async function PUT(
 
     const { id } = await context.params;
     const body = await req.json();
-    const { fullName, phone, email, ticketType } = body;
+    const { fullName, company, phone, email, ticketType } = body;
 
     const customer = await prisma.customer.update({
       where: { id },
       data: {
         fullName: fullName ? fullName.trim() : undefined,
-        phone: phone ? phone.trim() : null,
-        email: email ? email.trim() : null,
-        ticketType: ticketType ? ticketType.trim() : undefined,
+        company: company !== undefined ? (company ? company.trim() : null) : undefined,
+        phone: phone !== undefined ? (phone ? phone.trim() : null) : undefined,
+        email: email !== undefined ? (email ? email.trim() : null) : undefined,
+        ticketType: ticketType !== undefined ? (ticketType ? ticketType.trim() : null) : undefined,
       },
     });
 

@@ -37,6 +37,7 @@ model Customer {
   eventId     String
   event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   fullName    String
+  company     String?
   phone       String?
   email       String?
   ticketType  String?

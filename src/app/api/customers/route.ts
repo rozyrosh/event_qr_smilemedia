@@ -26,6 +26,7 @@ export async function GET(req: Request) {
     if (search) {
       where.OR = [
         { fullName: { contains: search } },
+        { company: { contains: search } },
         { email: { contains: search } },
         { phone: { contains: search } },
         { qrToken: { contains: search } },
@@ -77,11 +78,11 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { eventId, fullName, phone, email, ticketType } = body;
+    const { eventId, fullName, company, phone, email, ticketType } = body;
 
     if (!eventId || !fullName) {
       return NextResponse.json(
-        { error: 'Event ID and Full Name are required' },
+        { error: 'Event ID and Name are required' },
         { status: 400 }
       );
     }
@@ -93,9 +94,10 @@ export async function POST(req: Request) {
       data: {
         eventId,
         fullName: fullName.trim(),
+        company: company ? company.trim() : null,
         phone: phone ? phone.trim() : null,
         email: email ? email.trim() : null,
-        ticketType: ticketType ? ticketType.trim() : 'General Admission',
+        ticketType: ticketType ? ticketType.trim() : null,
         qrToken,
       },
       include: {
