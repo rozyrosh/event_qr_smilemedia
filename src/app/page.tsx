@@ -24,9 +24,6 @@ export default function HomePage() {
               <span className="text-xl font-black tracking-tight text-slate-900">
                 Event<span className="text-indigo-600">QR</span>
               </span>
-              <span className="text-xs px-2.5 py-0.5 ml-2.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-bold">
-                Enterprise
-              </span>
             </div>
           </div>
 
