@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { QrCode, ShieldCheck, Zap, ArrowRight, BarChart3, Smartphone } from 'lucide-react';
+import { QrCode, ShieldCheck, ArrowRight, BarChart3, Smartphone } from 'lucide-react';
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -70,11 +70,6 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex-1 flex flex-col justify-center">
         <div className="text-center max-w-3xl mx-auto space-y-6">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold shadow-xs">
-            <Zap className="w-3.5 h-3.5 text-indigo-600" />
-            <span>High Concurrency Safe Architecture (MySQL + Prisma)</span>
-          </div>
-
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-tight">
             Seamless Event Check-In <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
