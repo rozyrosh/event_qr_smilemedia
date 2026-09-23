@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { QrCode, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
+import { QrCode, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,12 +39,6 @@ export default function LoginPage() {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
-  };
-
-  const handleQuickFill = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError(null);
   };
 
   return (
@@ -88,7 +82,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@eventqr.io"
+                  placeholder="name@example.com"
                   className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-transparent transition shadow-xs"
                 />
               </div>
@@ -114,7 +108,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center space-x-2 transition disabled:opacity-50 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center space-x-2 transition disabled:opacity-50 cursor-pointer mt-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -126,38 +120,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo Login Quick Fills */}
-          <div className="pt-4 border-t border-slate-200 space-y-3">
-            <span className="text-xs font-semibold text-slate-500 block text-center">
-              Quick One-Click Demo Credentials:
-            </span>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin@eventqr.io', 'admin123')}
-                className="p-3 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 text-left transition group cursor-pointer"
-              >
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-indigo-700 group-hover:text-indigo-800">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600" />
-                  <span>Admin User</span>
-                </div>
-                <div className="text-[11px] text-slate-500 truncate mt-0.5">admin@eventqr.io</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickFill('staff@eventqr.io', 'staff123')}
-                className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-200 text-left transition group cursor-pointer"
-              >
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
-                  <UserCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Staff Scanner</span>
-                </div>
-                <div className="text-[11px] text-slate-500 truncate mt-0.5">staff@eventqr.io</div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
